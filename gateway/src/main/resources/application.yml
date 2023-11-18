@@ -1,0 +1,59 @@
+server:
+  port: 8088
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+      globalcors:
+        cors-configurations:
+          '[/auth/**]':
+            allowed-origins: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+          #            allow-credentials: true
+          '[/api/v1/order/**]':
+            allowed-origins: "http://localhost:3000"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            #            allow-credentials: true
+          '[/api/v1/payment-gateway/**]':
+            allowed-origins: "http://localhost:3000"
+            allowed-methods: "*"
+            allowed-headers: "*"
+          #            allow-credentials: true
+          '[/api/v1/admin/**]':
+            allowed-origins: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+#            allow-credentials: true
+      httpclient:
+        ssl:
+          useInsecureTrustManager: true
+      routes:
+        - id: user-management
+          uri: http://localhost:8089/
+          predicates:
+            - Path=/auth/**
+        - id: order-management
+          uri: http://localhost:8080/
+          predicates:
+            - Path=/api/v1/order/**
+        - id: admin-services
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/api/v1/admin/**
+        - id: payment-services
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/api/v1/payment-gateway/**
+        - id: delivery-services
+          uri: http://localhost:9090/
+          predicates:
+            - Path=/api/v1/delivery/**
+
